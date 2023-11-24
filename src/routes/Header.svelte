@@ -1,0 +1,6 @@
+<script>
+</script>
+
+<header>
+	<h1>Demo App</h1>
+</header>
