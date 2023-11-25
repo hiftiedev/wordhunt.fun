@@ -11,25 +11,21 @@
     let userInput: string = '';
     let result: string = '';
     let isMobile: boolean;
+    let showInput: boolean = false;
 
     function String(length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
         let result = '';
         let addedWord = false;
-
         const wordPosition = Math.floor(Math.random() * (length / 5 + 1)) * 5;
 
         for (let i = 0; i < length; i++) {
             if (!addedWord && i === wordPosition) {
                 const randomWordIndex = Math.floor(Math.random() * words.length);
                 const randomWord = words[randomWordIndex];
-
                 const randomCaseWord = randomWord.charAt(0).toUpperCase() + randomWord.slice(1).toLowerCase();
-
                 result += randomCaseWord;
                 addedWord = true;
-
                 localStorage.setItem('hiddenWord', randomWord.toLowerCase());
                 console.log(randomWord.toLowerCase());
             } else {
@@ -37,7 +33,6 @@
                 result += characters.charAt(randomIndex);
             }
         }
-
         return result;
     }
 
@@ -52,7 +47,7 @@
     }
 
     onMount(() => {
-        isMobile = window.innerWidth < 600; // Adjust the breakpoint as needed
+        isMobile = window.innerWidth < 600;
         localStorage.removeItem('hiddenWord');
         document.addEventListener('keydown', handleKeyDown);
 
@@ -71,6 +66,7 @@
         message = '';
         userInput = '';
         result = '';
+        showInput = true;
     }
 
     function checkUserInput() {
@@ -79,9 +75,11 @@
 
         if (trimmedUserInput === hiddenWord) {
             result = 'Correct!';
-        } else {
-            result = 'Wrong!';
-        }
+        } else if (trimmedUserInput === '') {
+			return;
+		} else {
+			result = 'Wrong!'
+		}
 
         localStorage.removeItem('hiddenWord');
 
@@ -94,7 +92,7 @@
     <meta name="description" content="Challenge your eyes and hunt for words within sentences that do not contain any spaces between them." />
 </svelte:head>
 
-<main class="flex flex-col items-center justify-center h-[100svh]">
+<main class="flex flex-col items-center justify-center h-[100svh] gap-6">
     <div class="bg-[#242632] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 text-white overflow-hidden">
         {#if message}
             <div class="break-words text-center">
@@ -110,14 +108,10 @@
         {/if}
     </div>
 
-	<input class="text-black" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
-	{#if result}
-		<p class="{result === 'Correct!' ? 'text-green-500' : 'text-red-500'}">{result}</p>
-	{/if}
-	{#if gameStarted && userInput.trim() === ''}
-		<p class="text-red-500">Write something</p>
-	{/if}
+    {#if showInput}
+        <input class="text-white bg-[#242632] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
+        {#if result}
+            <p class="{result === 'Correct!' ? 'text-green-500' : 'text-red-500'}">{result}</p>
+        {/if}
+    {/if}
 </main>
-
-<style>
-</style>
