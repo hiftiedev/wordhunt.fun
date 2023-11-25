@@ -9,9 +9,10 @@
     let randomString: string = '';
     let message: string = "Press 'Enter' to start the game";
     let userInput: string = '';
-    let resultMessage: string = '';
+    let result: string = '';
+    let isMobile: boolean;
 
-    function generateRandomStringWithWord(length: number): string {
+    function String(length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
         let result = '';
@@ -30,7 +31,7 @@
                 addedWord = true;
 
                 localStorage.setItem('hiddenWord', randomWord.toLowerCase());
-				console.log(randomWord.toLowerCase())
+                console.log(randomWord.toLowerCase());
             } else {
                 const randomIndex = Math.floor(Math.random() * characters.length);
                 result += characters.charAt(randomIndex);
@@ -40,23 +41,36 @@
         return result;
     }
 
+    function handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            if (!gameStarted) {
+                startGame();
+            } else {
+                checkUserInput();
+            }
+        }
+    }
+
     onMount(() => {
+        isMobile = window.innerWidth < 600; // Adjust the breakpoint as needed
         localStorage.removeItem('hiddenWord');
         document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
     });
 
     onDestroy(() => {
         localStorage.removeItem('hiddenWord');
     });
 
-    function handleKeyDown(event: KeyboardEvent) {
-        if (!gameStarted && event.key === 'Enter') {
-            gameStarted = true;
-            randomString = generateRandomStringWithWord(60);
-            message = '';
-            userInput = '';
-            resultMessage = '';
-        }
+    function startGame() {
+        gameStarted = true;
+        randomString = String(60);
+        message = '';
+        userInput = '';
+        result = '';
     }
 
     function checkUserInput() {
@@ -64,14 +78,14 @@
         const hiddenWord = localStorage.getItem('hiddenWord');
 
         if (trimmedUserInput === hiddenWord) {
-            resultMessage = 'Correct!';
+            result = 'Correct!';
         } else {
-            resultMessage = 'Wrong!';
+            result = 'Wrong!';
         }
 
         localStorage.removeItem('hiddenWord');
 
-        randomString = generateRandomStringWithWord(60);
+        randomString = String(60);
     }
 </script>
 
@@ -80,19 +94,29 @@
     <meta name="description" content="Challenge your eyes and hunt for words within sentences that do not contain any spaces between them." />
 </svelte:head>
 
-<main class="flex items-center justify-center h-[100svh]">
+<main class="flex flex-col items-center justify-center h-[100svh]">
     <div class="bg-[#242632] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 text-white overflow-hidden">
         {#if message}
-            <div class="break-words text-center">{message}</div>
+            <div class="break-words text-center">
+                {message}
+                {#if isMobile}
+                    <button on:click={startGame} class="text-blue-500 underline">(Enter)</button>
+                {/if}
+            </div>
         {:else}
-            <div class="break-words text-center">{randomString}</div>
-            <input class="text-black" type="text" bind:value={userInput} placeholder="Type the hidden word" />
-            <button on:click={checkUserInput}>Check</button>
-            {#if resultMessage}
-                <p class="{resultMessage === 'Correct!' ? 'text-green-500' : 'text-red-500'}">{resultMessage}</p>
-            {/if}
+            <div class="break-words text-center">
+                {randomString}
+            </div>
         {/if}
     </div>
+
+	<input class="text-black" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
+	{#if result}
+		<p class="{result === 'Correct!' ? 'text-green-500' : 'text-red-500'}">{result}</p>
+	{/if}
+	{#if gameStarted && userInput.trim() === ''}
+		<p class="text-red-500">Write something</p>
+	{/if}
 </main>
 
 <style>
