@@ -70,7 +70,7 @@
         userInput = '';
         result = '';
         showInput = true;
-        typingEffect("Search the word and type fast!");
+        typingEffect("Hunt the word and type fast!");
     }
 
     function checkUserInput() {
@@ -92,7 +92,7 @@
 
     function typingEffect(text: string) {
         let index = 0;
-        const speed = 50;
+        const speed = 80;
 
         function type() {
             if (index < text.length) {
