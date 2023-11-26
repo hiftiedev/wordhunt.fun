@@ -12,6 +12,9 @@
     let result: string = '';
     let isMobile: boolean;
     let showInput: boolean = false;
+    let typingText: string = '';
+
+    typingEffect("Good luck and have fun! 😉")
 
     function String(length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -67,6 +70,7 @@
         userInput = '';
         result = '';
         showInput = true;
+        typingEffect("Search the word and type fast!");
     }
 
     function checkUserInput() {
@@ -76,14 +80,29 @@
         if (trimmedUserInput === hiddenWord) {
             result = 'Correct!';
         } else if (trimmedUserInput === '') {
-			return;
-		} else {
-			result = 'Wrong!'
-		}
+            return;
+        } else {
+            result = 'Wrong!'
+        }
 
         localStorage.removeItem('hiddenWord');
-
         randomString = String(60);
+        typingEffect("Search the word and type fast!");
+    }
+
+    function typingEffect(text: string) {
+        let index = 0;
+        const speed = 50;
+
+        function type() {
+            if (index < text.length) {
+                typingText = text.slice(0, index + 1);
+                index++;
+                setTimeout(type, speed);
+            }
+        }
+
+        type();
     }
 </script>
 
@@ -93,7 +112,8 @@
 </svelte:head>
 
 <main class="flex flex-col items-center justify-center h-[100svh] gap-6">
-    <div class="bg-[#242632] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 text-white overflow-hidden">
+	<h1 class="text-white font-bold text-4xl w-full sm:text-5xl sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden text-left">{typingText}</h1>
+    <div class="bg-[#30343E] rounded-[5px] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 text-white overflow-hidden">
         {#if message}
             <div class="break-words text-center">
                 {message}
@@ -109,7 +129,7 @@
     </div>
 
     {#if showInput}
-        <input class="text-white bg-[#242632] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
+        <input class="focus:border-[33f4358] focus:outline-none rounded-[5px] text-white bg-[#30343E] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
         {#if result}
             <p class="{result === 'Correct!' ? 'text-green-500' : 'text-red-500'}">{result}</p>
         {/if}
