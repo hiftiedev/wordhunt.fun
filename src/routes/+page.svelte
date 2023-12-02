@@ -92,7 +92,7 @@
 </script>
 
 <svelte:head>
-    <title>WordHunt</title>
+    <title>WordHunt!</title>
     <meta name="description" content="Challenge your eyes and hunt for words within sentences that do not contain any spaces between them." />
 </svelte:head>
 
