@@ -1,5 +1,6 @@
 <script context="module">
     import words from '../words.json';
+    import timertimer from '../lib/+timer.svelte'
 </script>
 
 <script lang="ts">
@@ -12,25 +13,20 @@
     let result: string = '';
     let isMobile: boolean;
     let showInput: boolean = false;
-    let typingText: string = '';
 
-    typingEffect("Good luck and have fun! 😉")
+    function getRandomWord(): string {
+        const randomWordIndex = Math.floor(Math.random() * words.length);
+        return words[randomWordIndex];
+    }
 
-    function String(length: number): string {
+    function String(word: string, length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
-        let addedWord = false;
-        const wordPosition = Math.floor(Math.random() * (length / 5 + 1)) * 5;
 
         for (let i = 0; i < length; i++) {
-            if (!addedWord && i === wordPosition) {
-                const randomWordIndex = Math.floor(Math.random() * words.length);
-                const randomWord = words[randomWordIndex];
-                const randomCaseWord = randomWord.charAt(0).toUpperCase() + randomWord.slice(1).toLowerCase();
+            if (i === length / 2) {
+                const randomCaseWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
                 result += randomCaseWord;
-                addedWord = true;
-                localStorage.setItem('hiddenWord', randomWord.toLowerCase());
-                console.log(randomWord.toLowerCase());
             } else {
                 const randomIndex = Math.floor(Math.random() * characters.length);
                 result += characters.charAt(randomIndex);
@@ -39,8 +35,11 @@
         return result;
     }
 
+    const timer = timertimer();
+
     function handleKeyDown(event: KeyboardEvent) {
         if (event.key === 'Enter') {
+
             if (!gameStarted) {
                 startGame();
             } else {
@@ -64,13 +63,16 @@
     });
 
     function startGame() {
+        timer.StartTimer();
         gameStarted = true;
-        randomString = String(60);
+        const word = getRandomWord();
+        randomString = String(word, 60);
         message = '';
         userInput = '';
         result = '';
         showInput = true;
-        typingEffect("Hunt the word and type fast!");
+        localStorage.setItem('hiddenWord', word.toLowerCase());
+        console.log(word.toLowerCase());
     }
 
     function checkUserInput() {
@@ -79,30 +81,13 @@
 
         if (trimmedUserInput === hiddenWord) {
             result = 'Correct!';
+            localStorage.removeItem('hiddenWord');
+            startGame();
         } else if (trimmedUserInput === '') {
             return;
         } else {
-            result = 'Wrong!'
+            result = 'Wrong!';
         }
-
-        localStorage.removeItem('hiddenWord');
-        randomString = String(60);
-        typingEffect("Search the word and type fast!");
-    }
-
-    function typingEffect(text: string) {
-        let index = 0;
-        const speed = 80;
-
-        function type() {
-            if (index < text.length) {
-                typingText = text.slice(0, index + 1);
-                index++;
-                setTimeout(type, speed);
-            }
-        }
-
-        type();
     }
 </script>
 
@@ -112,8 +97,8 @@
 </svelte:head>
 
 <main class="flex flex-col items-center justify-center h-[100svh] gap-6">
-	<h1 class="text-white font-bold text-4xl w-full sm:text-5xl sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden text-left">{typingText}</h1>
-    <div class="bg-[#30343E] rounded-[5px] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 text-white overflow-hidden">
+    <div class="text-white">{timer.timer}</div>
+    <div class="bg-[#30343E] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 text-white overflow-hidden">
         {#if message}
             <div class="break-words text-center">
                 {message}
@@ -129,7 +114,7 @@
     </div>
 
     {#if showInput}
-        <input class="focus:border-[33f4358] focus:outline-none rounded-[5px] text-white bg-[#30343E] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
+        <input class="focus:border-[#3f4358] focus:outline-none text-white bg-[#30343E] w-full sm:max-w-[80%] md:max-w-[60%] lg:max-w-[40%] p-4 overflow-hidden" type="text" bind:value={userInput} placeholder="Type the hidden word" on:keydown={handleKeyDown} />
         {#if result}
             <p class="{result === 'Correct!' ? 'text-green-500' : 'text-red-500'}">{result}</p>
         {/if}
